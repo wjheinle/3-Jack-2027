@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2b1a14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>3 Jack</title>
+<meta name="apple-mobile-web-app-title" content="3 Jack">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/svg+xml" href="/icon.svg">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#1f1411; --card:#2d1f19; --card2:#38271f; --line:#4a352b;
+  --text:#f6ece0; --muted:#b9a592; --accent:#e8743b; --accent2:#f2b441;
+  --green:#7fae6b; --red:#e2604d;
+  --head:'Oswald',Impact,sans-serif; --body:'Inter',-apple-system,system-ui,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);font-size:15px}
+body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+h1,h2,h3{font-family:var(--head);letter-spacing:.04em;text-transform:uppercase;margin:0}
+.page{display:none;max-width:640px;margin:0 auto;padding:0 14px 24px}
+.page.active{display:block}
+.hero{margin:0 -14px 16px;padding:calc(34px + env(safe-area-inset-top)) 18px 22px;text-align:center;position:relative;overflow:hidden;
+  background:linear-gradient(180deg,#3b1d2f 0%,#8a3a3a 38%,#e8743b 72%,#f2b441 100%)}
+.hero .sun{position:absolute;left:50%;bottom:-70px;width:220px;height:220px;margin-left:-110px;border-radius:50%;background:radial-gradient(circle,#ffe08a 0%,#f2b441 55%,rgba(242,180,65,0) 72%);opacity:.7}
+.hero svg.cacti{position:absolute;left:0;right:0;bottom:0;width:100%;height:90px;opacity:.95}
+.hero>*:not(.sun):not(.cacti){position:relative;z-index:2}
+.hero h1{font-size:34px;line-height:1.05;text-shadow:0 2px 8px rgba(0,0,0,.4)}
+.hero .sub{font-size:13px;opacity:.9;margin-top:4px;letter-spacing:.08em;text-transform:uppercase}
+.cd-label{margin-top:18px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.95}
+.cd{display:flex;justify-content:center;gap:10px;margin:8px 0 70px}
+.cd div{background:rgba(31,20,17,.55);backdrop-filter:blur(4px);border-radius:12px;min-width:64px;padding:10px 6px}
+.cd b{display:block;font-family:var(--head);font-size:30px;line-height:1}
+.cd span{font-size:10px;letter-spacing:.12em;text-transform:uppercase;opacity:.85}
+.wx{position:absolute;top:calc(10px + env(safe-area-inset-top));right:12px;z-index:3;font-size:12px;background:rgba(31,20,17,.5);padding:5px 10px;border-radius:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card h2{font-size:17px;color:var(--accent2);margin-bottom:10px}
+.row{display:flex;gap:10px;align-items:center}
+.between{justify-content:space-between}
+.muted{color:var(--muted)} .small{font-size:12px}
+.chip{display:inline-block;background:var(--card2);border:1px solid var(--line);border-radius:20px;padding:3px 10px;font-size:12px;margin:2px 4px 2px 0}
+.chip.me{border-color:var(--accent);color:var(--accent2)}
+.tag{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;border-radius:6px;padding:2px 7px;font-weight:600}
+.tag.arrive{background:#27422a;color:#a7d99a}.tag.depart{background:#4a2a22;color:#f0a58f}
+.btn{background:var(--accent);color:#1f1411;border:0;border-radius:10px;padding:10px 14px;font:600 14px var(--body);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.btn.small{padding:6px 10px;font-size:12px}
+.btn.danger{background:var(--red);color:#fff}
+.btn:active{transform:scale(.97)}
+.top{display:flex;justify-content:space-between;align-items:center;margin:18px 0 12px}
+.top h1{font-size:24px}
+input,select,textarea{width:100%;background:#241812;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px;font:15px var(--body);outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+textarea{min-height:90px;resize:vertical}
+label{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:10px 0 4px}
+.day{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
+.day:last-child{border:0}
+.day .d{min-width:54px;font-family:var(--head);color:var(--accent2);line-height:1.1}
+.day .d small{display:block;font-family:var(--body);color:var(--muted);font-size:11px}
+.price{font-family:var(--head);font-size:22px;color:var(--accent2)}
+.bar{position:fixed;left:0;right:0;bottom:0;display:flex;background:#170e0b;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:20}
+.bar button{flex:1;background:none;border:0;color:var(--muted);padding:9px 0 8px;font:500 10px var(--body);letter-spacing:.04em;cursor:pointer}
+.bar button i{display:block;font-style:normal;font-size:20px;margin-bottom:2px}
+.bar button.active{color:var(--accent2)}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:50;display:none;align-items:flex-end;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--card);width:100%;max-width:640px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom))}
+.modal h2{font-size:20px;color:var(--accent2);margin-bottom:4px}
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.checks label{display:flex;align-items:center;gap:6px;text-transform:none;letter-spacing:0;font-size:14px;color:var(--text);background:var(--card2);border:1px solid var(--line);border-radius:20px;padding:6px 12px;margin:0}
+.checks input{width:auto}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bal{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line)}
+.bal:last-child{border:0}
+.pos{color:var(--green);font-weight:600}.neg{color:var(--red);font-weight:600}
+.exp{padding:10px 0;border-bottom:1px solid var(--line)}
+.exp:last-child{border:0}
+.cat-h{font-family:var(--head);letter-spacing:.06em;color:var(--accent2);font-size:13px;text-transform:uppercase;margin:14px 0 4px}
+.g-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.g-item input[type=checkbox]{width:22px;height:22px;flex:none;accent-color:var(--accent)}
+.g-item .nm{flex:1}
+.g-item.done .nm{text-decoration:line-through;color:var(--muted)}
+.prog{height:10px;background:#241812;border-radius:6px;overflow:hidden;margin:6px 0 4px}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s}
+.warn{background:#5a2a1e;border:1px solid var(--red);border-radius:10px;padding:10px;margin:10px 0;font-size:13px}
+.empty{color:var(--muted);text-align:center;padding:18px 0}
+a{color:var(--accent2)}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#000c;color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;z-index:60;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<div id="p-trip" class="page active">
+  <div class="hero">
+    <div class="wx" id="wx" style="display:none"></div>
+    <div class="sun"></div>
+    <h1>2027 3-Jack<br>Invitational/Cup</h1>
+    <div class="sub">Scottsdale &middot; May 29 to June 4</div>
+    <div class="cd-label" id="cdLabel">&nbsp;</div>
+    <div class="cd" id="cd">
+      <div><b id="cdD">0</b><span>days</span></div>
+      <div><b id="cdH">0</b><span>hrs</span></div>
+      <div><b id="cdM">0</b><span>min</span></div>
+      <div><b id="cdS">0</b><span>sec</span></div>
+    </div>
+    <svg class="cacti" viewBox="0 0 400 90" preserveAspectRatio="none" aria-hidden="true">
+      <path fill="#1f1411" d="M0 90V70c20-6 40-4 60 2 6-26 8-34 12-40 4 6 5 14 6 20 8-8 8-16 10-24 4 8 6 20 4 36 14-6 30-8 46-4 20 6 30 0 50-4 10-2 22 0 32 4 4-24 5-40 9-52 4 12 6 26 6 44 6-14 10-20 14-30 3 12 3 24 0 38 20-8 44-10 64-2 20 8 40 6 57-4V90z"/>
+    </svg>
+  </div>
+
+  <div class="card">
+    <h2>Who am I?</h2>
+    <div id="whoami"></div>
+    <div class="muted small" style="margin-top:6px">Sets the default for expenses and the grocery list on this phone.</div>
+  </div>
+
+  <div class="card"><h2>The Week</h2><div id="itin"></div></div>
+
+  <div class="card">
+    <h2>The Crew</h2>
+    <div id="crew"></div>
+    <div class="muted small" style="margin-top:8px">6 of us in the house, 28 guys in the tournament.</div>
+  </div>
+  <div id="fallbackWarn"></div>
+</div>
+
+<div id="p-golf" class="page">
+  <div class="top"><h1>Golf</h1><button class="btn small" onclick="editGolf()">+ Round</button></div>
+  <div id="golfList"></div>
+  <div class="card" id="golfTotal"></div>
+  <div class="card">
+    <h2>2027 3-Jack Invitational/Cup</h2>
+    <div class="muted small" style="margin-bottom:6px">28 players. Format, teams, pairings and rules go here.</div>
+    <textarea id="tournNotes" placeholder="Details coming soon..."></textarea>
+    <div class="row between" style="margin-top:8px"><span class="muted small" id="tournStatus"></span><button class="btn small" onclick="saveTourn()">Save</button></div>
+  </div>
+</div>
+
+<div id="p-flights" class="page">
+  <div class="top"><h1>Flights</h1><button class="btn small" onclick="editFlight()">+ Flight</button></div>
+  <div id="flightList"></div>
+</div>
+
+<div id="p-vrbo" class="page">
+  <div class="top"><h1>The House</h1><span class="muted small" id="vrboStatus"></span></div>
+  <div class="card" id="vrboCard"></div>
+</div>
+
+<div id="p-money" class="page">
+  <div class="top"><h1>Expenses</h1><div class="row"><button class="btn ghost small" onclick="editPayment()">Payment</button><button class="btn small" onclick="editExpense()">+ Expense</button></div></div>
+  <div class="card"><h2>Balances</h2><div id="balances"></div></div>
+  <div class="card"><h2>Settle Up</h2><div id="settle"></div></div>
+  <div class="card"><h2>Ledger</h2><div id="ledger"></div></div>
+</div>
+
+<div id="p-grocery" class="page">
+  <div class="top"><h1>Grocery</h1><button class="btn ghost small" onclick="mergeDupes()">Merge dupes</button></div>
+  <div class="card">
+    <div class="row"><input id="gName" placeholder="Add an item" style="flex:2"><input id="gQty" placeholder="Qty" style="flex:1"></div>
+    <div class="row" style="margin-top:8px"><select id="gCat" style="flex:1"></select><button class="btn" onclick="addGrocery()">Add</button></div>
+    <div class="prog"><i id="gProg" style="width:0"></i></div>
+    <div class="muted small" id="gProgText"></div>
+  </div>
+  <div id="gList"></div>
+  <button class="btn ghost small" style="width:100%;margin-top:10px" onclick="clearChecked()">Remove checked items</button>
+</div>
+
+<div class="bar" id="bar">
+  <button data-t="trip" class="active"><i>🌵</i>Trip</button>
+  <button data-t="golf"><i>⛳</i>Golf</button>
+  <button data-t="flights"><i>✈️</i>Flights</button>
+  <button data-t="vrbo"><i>🏠</i>House</button>
+  <button data-t="money"><i>💵</i>Money</button>
+  <button data-t="grocery"><i>🛒</i>Grocery</button>
+</div>
+
+<div class="modal-bg" id="mbg"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const CREW = ['Bill','Mike','Meachum','Andy','Freddie','Benny'];
+const LAND = new Date('2027-05-29T13:10:00-07:00');   // Arizona is MST all year (UTC-7)
+const DEPART = new Date('2027-06-04T09:00:00-07:00');
+const CATS = ['Produce','Meat & Seafood','Dairy & Eggs','Pantry','Breakfast','Drinks','Beer & Liquor','Snacks','Supplies','Other'];
+
+let S = { rev:0, golf:[], flights:[], expenses:[], groceries:[], vrbo:{}, tournament:{} };
+let me = ls('me') || '';
+function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v);}catch(e){return null} }
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money = c => (c<0?'-':'') + '$' + (Math.abs(c)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const dollars = n => '$' + Number(n).toLocaleString('en-US',{maximumFractionDigits:2});
+function pd(s){ const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }
+function fmtDate(s,long){ if(!s) return 'Date TBD'; return pd(s).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}); }
+function fmtTime(t){ if(!t) return ''; const [h,m]=t.split(':').map(Number); return ((h%12)||12)+':'+String(m).padStart(2,'0')+' '+(h<12?'AM':'PM'); }
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1600); }
+
+async function api(method,url,body){
+  const r = await fetch(url,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
+  if(!r.ok) throw new Error('request failed');
+  return r.json();
+}
+async function load(force){
+  try{
+    const s = await api('GET','/api/state');
+    if(force || s.rev !== S.rev){ S = s; renderAll(); }
+  }catch(e){}
+}
+
+/* ---------- tabs ---------- */
+document.querySelectorAll('#bar button').forEach(b=>b.onclick=()=>showTab(b.dataset.t));
+function showTab(t){
+  document.querySelectorAll('#bar button').forEach(x=>x.classList.toggle('active',x.dataset.t===t));
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='p-'+t));
+  window.scrollTo(0,0); ls('tab',t);
+}
+
+/* ---------- countdown ---------- */
+function tick(){
+  const now = new Date();
+  let target, label;
+  if(now < LAND){ target = LAND; label = 'Until wheels down in Scottsdale'; }
+  else if(now < DEPART){ target = DEPART; label = 'Until we fly home'; }
+  else { $('cdLabel').textContent = 'Until next May'; $('cd').style.display='none'; return; }
+  $('cdLabel').textContent = label;
+  let d = Math.max(0, target - now);
+  const days = Math.floor(d/864e5); d -= days*864e5;
+  const h = Math.floor(d/36e5); d -= h*36e5;
+  const m = Math.floor(d/6e4); d -= m*6e4;
+  $('cdD').textContent = days; $('cdH').textContent = h; $('cdM').textContent = m; $('cdS').textContent = Math.floor(d/1000);
+}
+setInterval(tick,1000);
+
+/* ---------- weather (Scottsdale, no key) ---------- */
+fetch('https://api.open-meteo.com/v1/forecast?latitude=33.49&longitude=-111.93&current=temperature_2m&temperature_unit=fahrenheit')
+  .then(r=>r.json()).then(j=>{ const t=Math.round(j.current.temperature_2m); const w=$('wx'); w.style.display='block'; w.textContent='Scottsdale now: '+t+'\u00B0F'; }).catch(()=>{});
+
+/* ---------- Trip tab ---------- */
+function renderTrip(){
+  $('whoami').innerHTML = CREW.map(n=>`<span class="chip ${n===me?'me':''}" style="cursor:pointer" onclick="setMe('${n}')">${n}</span>`).join('');
+  $('crew').innerHTML = CREW.map(n=>`<span class="chip ${n===me?'me':''}">${n}</span>`).join('');
+  const rows = [
+    ['2027-05-29','Land in Scottsdale','JSX XE463 lands 1:10 PM'],
+    ...S.golf.map(g=>[g.date, g.course+' ('+g.layout+')', g.teeTime?('Tee time '+g.teeTime):'Tee time TBD']),
+    ['2027-06-01','Open day','Tournament details TBD'],
+    ['2027-06-04','Fly home','JSX XE462 departs 9:00 AM']
+  ].sort((a,b)=>a[0].localeCompare(b[0]));
+  $('itin').innerHTML = rows.map(r=>{
+    const d=pd(r[0]);
+    return `<div class="day"><div class="d">${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}<small>${d.toLocaleDateString('en-US',{weekday:'long'})}</small></div><div><div>${esc(r[1])}</div><div class="muted small">${esc(r[2])}</div></div></div>`;
+  }).join('');
+  $('fallbackWarn').innerHTML = S.usingFallback ? '<div class="warn">Server is not using the /data volume. Entries will be lost on redeploy. Check the Railway volume mount path.</div>' : '';
+}
+function setMe(n){ me=n; ls('me',n); renderTrip(); }
+
+/* ---------- generic form modal ---------- */
+function openForm(title, fields, vals, onSave, onDelete){
+  vals = vals || {};
+  let h = `<h2>${esc(title)}</h2>`;
+  for(const f of fields){
+    if(f.row){ h += '<div class="grid2">'; for(const g of f.row) h += fieldHtml(g, vals); h += '</div>'; }
+    else h += fieldHtml(f, vals);
+  }
+  h += `<div class="row between" style="margin-top:16px"><div>${onDelete?'<button class="btn danger small" id="mDel">Delete</button>':''}</div><div class="row"><button class="btn ghost" id="mCancel">Cancel</button><button class="btn" id="mSave">Save</button></div></div>`;
+  $('modal').innerHTML = h;
+  $('mbg').classList.add('open');
+  $('mCancel').onclick = closeForm;
+  $('mSave').onclick = async ()=>{
+    const out = {};
+    for(const f of fields.flatMap(x=>x.row||[x])){
+      if(f.type==='checks') out[f.key] = [...document.querySelectorAll(`[name="${f.key}"]:checked`)].map(x=>x.value);
+      else { const v = $('f_'+f.key).value; out[f.key] = f.type==='number' ? (v===''?'':Number(v)) : v.trim(); }
+    }
+    if(await onSave(out) !== false) closeForm();
+  };
+  if(onDelete) $('mDel').onclick = async ()=>{ if(confirm('Delete this?')){ await onDelete(); closeForm(); } };
+}
+function fieldHtml(f, vals){
+  const v = vals[f.key]!==undefined ? vals[f.key] : (f.def!==undefined?f.def:'');
+  let inner;
+  if(f.type==='select') inner = `<select id="f_${f.key}">${f.options.map(o=>`<option ${o===v?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
+  else if(f.type==='textarea') inner = `<textarea id="f_${f.key}">${esc(v)}</textarea>`;
+  else if(f.type==='checks') inner = `<div class="checks">${f.options.map(o=>`<label><input type="checkbox" name="${f.key}" value="${esc(o)}" ${(v||[]).includes(o)?'checked':''}>${esc(o)}</label>`).join('')}</div>`;
+  else inner = `<input id="f_${f.key}" type="${f.type||'text'}" ${f.type==='number'?'step="0.01" inputmode="decimal"':''} placeholder="${esc(f.ph||'')}" value="${esc(v)}">`;
+  return `<div><label>${esc(f.label)}</label>${inner}</div>`;
+}
+function closeForm(){ $('mbg').classList.remove('open'); }
+$('mbg').addEventListener('click',e=>{ if(e.target===$('mbg')) closeForm(); });
+
+/* ---------- Golf ---------- */
+function renderGolf(){
+  const rounds = [...S.golf].sort((a,b)=>(a.date||'z').localeCompare(b.date||'z'));
+  $('golfList').innerHTML = rounds.length ? rounds.map(g=>`
+    <div class="card" onclick="editGolf('${g.id}')">
+      <div class="row between">
+        <div><div class="muted small">${fmtDate(g.date)}${g.teeTime?' &middot; '+esc(g.teeTime):' &middot; tee time TBD'}</div>
+        <h2 style="margin:2px 0 0;color:var(--text)">${esc(g.course)}</h2>
+        <div>${esc(g.layout)}</div></div>
+        <div style="text-align:right"><div class="price">${g.cost?dollars(g.cost):'Paid'}</div><div class="muted small">${esc(g.costNote||'')}</div></div>
+      </div>
+      ${g.notes?`<div class="muted small" style="margin-top:8px">${esc(g.notes)}</div>`:''}
+    </div>`).join('') : '<div class="empty">No rounds yet.</div>';
+  const total = S.golf.reduce((a,g)=>a+(Number(g.cost)||0),0);
+  $('golfTotal').innerHTML = `<div class="row between"><div><h2 style="margin:0">Green fees per player</h2><div class="muted small">Before tax. Tap a round to edit.</div></div><div class="price">${dollars(total)}</div></div>`;
+  if(document.activeElement!==$('tournNotes')) $('tournNotes').value = (S.tournament&&S.tournament.notes)||'';
+}
+function editGolf(id){
+  const g = id ? S.golf.find(x=>x.id===id) : {};
+  openForm(id?'Edit round':'Add round',[
+    {key:'course',label:'Course',ph:'Grayhawk Golf Club'},
+    {key:'layout',label:'Layout / course name'},
+    {row:[{key:'date',label:'Date',type:'date'},{key:'teeTime',label:'Tee time',ph:'8:10 AM'}]},
+    {row:[{key:'cost',label:'Cost per player ($)',type:'number'},{key:'costNote',label:'Cost note',ph:'plus tax'}]},
+    {key:'notes',label:'Notes',type:'textarea'}
+  ], g, async v=>{
+    if(!v.course) return false;
+    if(v.cost==='') v.cost=0;
+    id ? await api('PATCH','/api/golf/'+id,v) : await api('POST','/api/golf',v);
+    await load(true);
+  }, id?async()=>{ await api('DELETE','/api/golf/'+id); await load(true); }:null);
+}
+async function saveTourn(){
+  await api('PUT','/api/tournament',{notes:$('tournNotes').value});
+  $('tournStatus').textContent='Saved'; setTimeout(()=>$('tournStatus').textContent='',1500); load(true);
+}
+
+/* ---------- Flights ---------- */
+function renderFlights(){
+  const fl = [...S.flights].sort((a,b)=>((a.date||'9999')+(a.time||'')).localeCompare((b.date||'9999')+(b.time||'')));
+  $('flightList').innerHTML = fl.length ? fl.map(f=>`
+    <div class="card" onclick="editFlight('${f.id}')">
+      <div class="row between"><span class="tag ${f.dir==='Depart'?'depart':'arrive'}">${esc(f.dir)}</span><span class="muted small">${esc(f.airline)} ${esc(f.flightNo)}</span></div>
+      <h2 style="color:var(--text);margin:8px 0 2px">${esc(f.from||'TBD')} &rarr; ${esc(f.to||'TBD')}</h2>
+      <div>${fmtDate(f.date)}${f.time?' &middot; '+fmtTime(f.time):''}</div>
+      <div style="margin-top:8px">${(f.travelers||'').split(',').map(s=>s.trim()).filter(Boolean).map(n=>`<span class="chip ${n===me?'me':''}">${esc(n)}</span>`).join('')}</div>
+      ${f.confirmation?`<div class="small" style="margin-top:6px">Confirmation: <b>${esc(f.confirmation)}</b></div>`:''}
+      ${f.notes?`<div class="muted small" style="margin-top:6px">${esc(f.notes)}</div>`:''}
+    </div>`).join('') : '<div class="empty">No flights yet.</div>';
+}
+function editFlight(id){
+  const f = id ? S.flights.find(x=>x.id===id) : {dir:'Arrive'};
+  openForm(id?'Edit flight':'Add flight',[
+    {row:[{key:'dir',label:'Direction',type:'select',options:['Arrive','Depart']},{key:'airline',label:'Airline'}]},
+    {row:[{key:'flightNo',label:'Flight #'},{key:'confirmation',label:'Confirmation'}]},
+    {row:[{key:'from',label:'From'},{key:'to',label:'To'}]},
+    {row:[{key:'date',label:'Date',type:'date'},{key:'time',label:'Time',type:'time'}]},
+    {key:'travelers',label:'Travelers (comma separated)',ph:'Freddie, Benny'},
+    {key:'notes',label:'Notes',type:'textarea'}
+  ], f, async v=>{
+    id ? await api('PATCH','/api/flights/'+id,v) : await api('POST','/api/flights',v);
+    await load(true);
+  }, id?async()=>{ await api('DELETE','/api/flights/'+id); await load(true); }:null);
+}
+
+/* ---------- VRBO ---------- */
+const VFIELDS = [
+  ['name','Property name','text'],['address','Address','text'],['link','VRBO link','url'],
+  ['checkIn','Check-in','text'],['checkOut','Check-out','text'],['confirmation','Confirmation #','text'],
+  ['hostName','Host / manager','text'],['hostPhone','Host phone','tel'],['doorCode','Door / lockbox code','text'],
+  ['wifiName','Wi-Fi name','text'],['wifiPass','Wi-Fi password','text'],['bedrooms','Bedrooms / beds','text'],
+  ['totalCost','Total cost ($)','number'],['notes','Notes','textarea']
+];
+function renderVrbo(){
+  if($('vrboCard').contains(document.activeElement) && document.activeElement.tagName!=='BODY') return;
+  const v = S.vrbo || {};
+  const per = v.totalCost ? dollars(Math.round(Number(v.totalCost)/CREW.length*100)/100) : '';
+  $('vrboCard').innerHTML =
+    (!Object.keys(v).length ? '<div class="muted small">Not booked yet. Fill this in once we pick one. It saves as you type.</div>' : '') +
+    VFIELDS.map(([k,l,t])=> t==='textarea'
+      ? `<label>${l}</label><textarea data-k="${k}">${esc(v[k]||'')}</textarea>`
+      : `<label>${l}</label><input data-k="${k}" type="${t}" ${t==='number'?'step="0.01" inputmode="decimal"':''} value="${esc(v[k]||'')}">`).join('') +
+    (per?`<div class="row between" style="margin-top:14px"><span class="muted">Per person (${CREW.length} guys)</span><span class="price">${per}</span></div>`:'') +
+    (v.link?`<a class="btn" style="display:block;text-align:center;text-decoration:none;margin-top:14px" href="${esc(v.link)}" target="_blank" rel="noopener">Open VRBO listing</a>`:'') +
+    (v.address?`<a class="btn ghost" style="display:block;text-align:center;text-decoration:none;margin-top:8px" href="https://maps.google.com/?q=${encodeURIComponent(v.address)}" target="_blank" rel="noopener">Directions</a>`:'');
+  $('vrboCard').querySelectorAll('[data-k]').forEach(el=>el.addEventListener('change',saveVrbo));
+}
+async function saveVrbo(){
+  const o = {};
+  $('vrboCard').querySelectorAll('[data-k]').forEach(el=>{ const val=el.value.trim(); if(val!=='') o[el.dataset.k]= el.type==='number'?Number(val):val; });
+  await api('PUT','/api/vrbo',o);
+  $('vrboStatus').textContent='Saved'; setTimeout(()=>$('vrboStatus').textContent='',1500);
+  const s = await api('GET','/api/state'); S.rev = s.rev; S.vrbo = s.vrbo;
+  renderTrip();
+}
+
+/* ---------- Expenses ---------- */
+function computeBalances(){
+  const bal = Object.fromEntries(CREW.map(n=>[n,0])), spent = {...bal};
+  for(const e of S.expenses){
+    const cents = Math.round(Number(e.amount)*100);
+    if(e.type==='payment'){ bal[e.payer]=(bal[e.payer]||0)+cents; bal[e.to]=(bal[e.to]||0)-cents; continue; }
+    const split = (e.split&&e.split.length)?e.split:CREW;
+    const base = Math.floor(cents/split.length); let rem = cents - base*split.length;
+    bal[e.payer]=(bal[e.payer]||0)+cents;
+    split.forEach(n=>{ const share = base + (rem>0?1:0); if(rem>0) rem--; bal[n]=(bal[n]||0)-share; spent[n]=(spent[n]||0)+share; });
+  }
+  return {bal,spent};
+}
+function transfers(bal){
+  const cr = Object.entries(bal).filter(([,v])=>v>0).map(([n,v])=>[n,v]).sort((a,b)=>b[1]-a[1]);
+  const db = Object.entries(bal).filter(([,v])=>v<0).map(([n,v])=>[n,-v]).sort((a,b)=>b[1]-a[1]);
+  const out=[]; let i=0,j=0;
+  while(i<db.length && j<cr.length){
+    const amt = Math.min(db[i][1],cr[j][1]);
+    if(amt>0) out.push([db[i][0],cr[j][0],amt]);
+    db[i][1]-=amt; cr[j][1]-=amt;
+    if(db[i][1]===0) i++; if(cr[j][1]===0) j++;
+  }
+  return out;
+}
+function renderMoney(){
+  const {bal,spent} = computeBalances();
+  $('balances').innerHTML = CREW.map(n=>`<div class="bal"><span>${n}${n===me?' (you)':''}<span class="muted small"> &middot; share ${money(spent[n]||0)}</span></span><span class="${bal[n]>0?'pos':bal[n]<0?'neg':''}">${bal[n]>0?'is owed ':bal[n]<0?'owes ':''}${money(Math.abs(bal[n]))}</span></div>`).join('');
+  const t = transfers(bal);
+  $('settle').innerHTML = t.length ? t.map(([a,b,c])=>`<div class="bal"><span><b>${a}</b> pays <b>${b}</b></span><span class="price" style="font-size:18px">${money(c)}</span></div>`).join('') : '<div class="empty">All square.</div>';
+  const ex = [...S.expenses].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  $('ledger').innerHTML = ex.length ? ex.map(e=>{
+    if(e.type==='payment') return `<div class="exp" onclick="editPayment('${e.id}')"><div class="row between"><span>${esc(e.payer)} paid ${esc(e.to)}</span><b>${dollars(e.amount)}</b></div><div class="muted small">Payment${e.date?' &middot; '+fmtDate(e.date):''}</div></div>`;
+    const sp = (e.split&&e.split.length&&e.split.length<CREW.length)?('Split: '+e.split.join(', ')):'Split evenly, all 6';
+    return `<div class="exp" onclick="editExpense('${e.id}')"><div class="row between"><span>${esc(e.desc)}</span><b>${dollars(e.amount)}</b></div><div class="muted small">${esc(e.payer)} paid &middot; ${sp}${e.date?' &middot; '+fmtDate(e.date):''}</div></div>`;
+  }).join('') : '<div class="empty">No expenses yet. Whoever pays, add it here.</div>';
+}
+function today(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function editExpense(id){
+  const e = id ? S.expenses.find(x=>x.id===id) : {payer:me||CREW[0], split:CREW, date:today()};
+  openForm(id?'Edit expense':'Add expense',[
+    {key:'desc',label:'What was it',ph:'Groceries, Uber, dinner...'},
+    {row:[{key:'amount',label:'Amount ($)',type:'number'},{key:'date',label:'Date',type:'date'}]},
+    {key:'payer',label:'Who paid',type:'select',options:CREW},
+    {key:'split',label:'Split between',type:'checks',options:CREW}
+  ], e, async v=>{
+    if(!v.desc || !(v.amount>0) || !v.split.length) { toast('Need a description, amount and at least one person'); return false; }
+    v.type='expense';
+    id ? await api('PATCH','/api/expenses/'+id,v) : await api('POST','/api/expenses',v);
+    await load(true);
+  }, id?async()=>{ await api('DELETE','/api/expenses/'+id); await load(true); }:null);
+}
+function editPayment(id){
+  const e = id ? S.expenses.find(x=>x.id===id) : {payer:me||CREW[0], to:CREW[0], date:today()};
+  openForm(id?'Edit payment':'Record a payment',[
+    {row:[{key:'payer',label:'From',type:'select',options:CREW},{key:'to',label:'To',type:'select',options:CREW}]},
+    {row:[{key:'amount',label:'Amount ($)',type:'number'},{key:'date',label:'Date',type:'date'}]}
+  ], e, async v=>{
+    if(!(v.amount>0) || v.payer===v.to){ toast('Pick two different people and an amount'); return false; }
+    v.type='payment'; v.desc='Payment';
+    id ? await api('PATCH','/api/expenses/'+id,v) : await api('POST','/api/expenses',v);
+    await load(true);
+  }, id?async()=>{ await api('DELETE','/api/expenses/'+id); await load(true); }:null);
+}
+
+/* ---------- Grocery ---------- */
+$('gCat').innerHTML = CATS.map(c=>`<option>${esc(c)}</option>`).join('');
+async function addGrocery(){
+  const name = $('gName').value.trim(); if(!name) return;
+  await api('POST','/api/groceries',{name,qty:$('gQty').value.trim(),category:$('gCat').value,addedBy:me||'',checked:false});
+  $('gName').value=''; $('gQty').value=''; await load(true); $('gName').focus();
+}
+$('gName').addEventListener('keydown',e=>{ if(e.key==='Enter') addGrocery(); });
+async function toggleG(id,checked){
+  const g = S.groceries.find(x=>x.id===id); if(g) g.checked=checked; renderGrocery();
+  await api('PATCH','/api/groceries/'+id,{checked}); load();
+}
+function editG(id){
+  const g = S.groceries.find(x=>x.id===id);
+  openForm('Edit item',[
+    {key:'name',label:'Item'},
+    {row:[{key:'qty',label:'Qty'},{key:'category',label:'Category',type:'select',options:CATS}]},
+    {key:'addedBy',label:'Added by',type:'select',options:['',...CREW]}
+  ], g, async v=>{ if(!v.name) return false; await api('PATCH','/api/groceries/'+id,v); await load(true); },
+  async()=>{ await api('DELETE','/api/groceries/'+id); await load(true); });
+}
+async function clearChecked(){
+  const done = S.groceries.filter(g=>g.checked);
+  if(!done.length) return toast('Nothing checked');
+  if(!confirm('Remove '+done.length+' checked item(s)?')) return;
+  await Promise.all(done.map(g=>api('DELETE','/api/groceries/'+g.id)));
+  load(true);
+}
+const norm = s => s.toLowerCase().replace(/[^a-z0-9 ]/g,'').trim().replace(/(es|s)$/,'');
+async function mergeDupes(){
+  const groups = {};
+  S.groceries.filter(g=>!g.checked).forEach(g=>{ (groups[norm(g.name)] = groups[norm(g.name)]||[]).push(g); });
+  const dup = Object.values(groups).filter(a=>a.length>1);
+  if(!dup.length) return toast('No duplicates found');
+  const msg = dup.map(a=>'\u2022 '+a[0].name+' ('+a.map(x=>(x.qty||'1')+(x.addedBy?' from '+x.addedBy:'')).join(' + ')+')').join('\n');
+  if(!confirm('Merge these?\n\n'+msg)) return;
+  for(const a of dup){
+    const nums = a.map(x=>x.qty===''||x.qty==null?1:Number(x.qty));
+    const qty = nums.every(n=>Number.isFinite(n)) ? String(nums.reduce((s,n)=>s+n,0)) : a.map(x=>x.qty||'1').join(' + ');
+    const who = [...new Set(a.map(x=>x.addedBy).filter(Boolean))].join(', ');
+    await api('POST','/api/groceries/merge',{ids:a.map(x=>x.id),item:{name:a[0].name,qty,category:a[0].category,addedBy:who}});
+  }
+  await load(true); toast('Merged');
+}
+function renderGrocery(){
+  const list = S.groceries, done = list.filter(g=>g.checked).length;
+  $('gProg').style.width = list.length ? (done/list.length*100)+'%' : '0';
+  $('gProgText').textContent = list.length ? `${done} of ${list.length} grabbed` : 'Nothing on the list yet';
+  const byCat = {};
+  list.forEach(g=>{ (byCat[g.category||'Other'] = byCat[g.category||'Other']||[]).push(g); });
+  $('gList').innerHTML = CATS.filter(c=>byCat[c]).concat(Object.keys(byCat).filter(c=>!CATS.includes(c))).map(c=>`
+    <div class="cat-h">${esc(c)}</div><div class="card" style="padding:4px 12px">` +
+    byCat[c].sort((a,b)=>(a.checked-b.checked)||(a.createdAt-b.createdAt)).map(g=>`
+      <div class="g-item ${g.checked?'done':''}">
+        <input type="checkbox" ${g.checked?'checked':''} onchange="toggleG('${g.id}',this.checked)">
+        <div class="nm" onclick="editG('${g.id}')">${esc(g.name)}${g.qty?` <span class="muted">&times; ${esc(g.qty)}</span>`:''}</div>
+        ${g.addedBy?`<span class="chip" style="margin:0">${esc(g.addedBy)}</span>`:''}
+      </div>`).join('') + '</div>').join('');
+}
+
+/* ---------- boot ---------- */
+function renderAll(){
+  if($('mbg').classList.contains('open')) { renderTripSafe(); return; }
+  renderTrip(); renderGolf(); renderFlights(); renderVrbo(); renderMoney(); renderGrocery();
+}
+function renderTripSafe(){ /* a form is open; keep the UI steady and catch up on close */ pending = true; }
+let pending = false;
+new MutationObserver(()=>{ if(!$('mbg').classList.contains('open') && pending){ pending=false; renderAll(); } })
+  .observe($('mbg'),{attributes:true,attributeFilter:['class']});
+
+load(true).then(()=>{ const t = ls('tab'); if(t && document.getElementById('p-'+t)) showTab(t); });
+tick();
+setInterval(()=>{ if(!document.hidden && document.activeElement.tagName!=='INPUT' && document.activeElement.tagName!=='TEXTAREA') load(); },8000);
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) load(); });
+</script>
+</body>
+</html>
