@@ -136,11 +136,6 @@ a{color:var(--accent2)}
     </svg>
   </div>
 
-  <div class="card">
-    <h2>Who am I?</h2>
-    <div id="whoami"></div>
-    <div class="muted small" style="margin-top:6px">Sets the default for expenses and the grocery list on this phone.</div>
-  </div>
 
   <div class="card"><div class="row between" style="align-items:flex-start"><h2>The Week</h2><span class="wx" id="wx" style="display:none"></span></div><div id="itin"></div></div>
 
@@ -317,7 +312,6 @@ fetch('https://api.open-meteo.com/v1/forecast?latitude=33.49&longitude=-111.93&c
 
 /* ---------- Trip tab ---------- */
 function renderTrip(){
-  $('whoami').innerHTML = CREW.map(n=>`<span class="chip ${n===me?'me':''}" style="cursor:pointer" onclick="setMe('${n}')">${n}</span>`).join('');
   $('crew').innerHTML = CREW.map(n=>`<span class="chip ${n===me?'me':''}">${n}</span>`).join('');
   const rows = [
     ['2027-05-29','Land in Scottsdale','JSX XE463 lands 1:10 PM'],
@@ -331,7 +325,6 @@ function renderTrip(){
   }).join('');
   $('fallbackWarn').innerHTML = S.usingFallback ? '<div class="warn">Server is not using the /data volume. Entries will be lost on redeploy. Check the Railway volume mount path.</div>' : '';
 }
-function setMe(n){ me=n; ls('me',n); renderTrip(); }
 
 /* ---------- generic form modal ---------- */
 function openForm(title, fields, vals, onSave, onDelete){
@@ -532,7 +525,7 @@ function editPayment(id){
 $('gCat').innerHTML = CATS.map(c=>`<option>${esc(c)}</option>`).join('');
 async function addGrocery(){
   const name = $('gName').value.trim(); if(!name) return;
-  await api('POST','/api/groceries',{name,qty:$('gQty').value.trim(),category:$('gCat').value,addedBy:me||'',checked:false});
+  await api('POST','/api/groceries',{name,qty:$('gQty').value.trim(),category:$('gCat').value,checked:false});
   $('gName').value=''; $('gQty').value=''; await load(true); $('gName').focus();
 }
 $('gName').addEventListener('keydown',e=>{ if(e.key==='Enter') addGrocery(); });
@@ -544,8 +537,7 @@ function editG(id){
   const g = S.groceries.find(x=>x.id===id);
   openForm('Edit item',[
     {key:'name',label:'Item'},
-    {row:[{key:'qty',label:'Qty'},{key:'category',label:'Category',type:'select',options:CATS}]},
-    {key:'addedBy',label:'Added by',type:'select',options:['',...CREW]}
+    {row:[{key:'qty',label:'Qty'},{key:'category',label:'Category',type:'select',options:CATS}]}
   ], g, async v=>{ if(!v.name) return false; await api('PATCH','/api/groceries/'+id,v); await load(true); },
   async()=>{ await api('DELETE','/api/groceries/'+id); await load(true); });
 }
@@ -562,13 +554,12 @@ async function mergeDupes(){
   S.groceries.filter(g=>!g.checked).forEach(g=>{ (groups[norm(g.name)] = groups[norm(g.name)]||[]).push(g); });
   const dup = Object.values(groups).filter(a=>a.length>1);
   if(!dup.length) return toast('No duplicates found');
-  const msg = dup.map(a=>'\u2022 '+a[0].name+' ('+a.map(x=>(x.qty||'1')+(x.addedBy?' from '+x.addedBy:'')).join(' + ')+')').join('\n');
+  const msg = dup.map(a=>'\u2022 '+a[0].name+' ('+a.map(x=>(x.qty||'1')).join(' + ')+')').join('\n');
   if(!confirm('Merge these?\n\n'+msg)) return;
   for(const a of dup){
     const nums = a.map(x=>x.qty===''||x.qty==null?1:Number(x.qty));
     const qty = nums.every(n=>Number.isFinite(n)) ? String(nums.reduce((s,n)=>s+n,0)) : a.map(x=>x.qty||'1').join(' + ');
-    const who = [...new Set(a.map(x=>x.addedBy).filter(Boolean))].join(', ');
-    await api('POST','/api/groceries/merge',{ids:a.map(x=>x.id),item:{name:a[0].name,qty,category:a[0].category,addedBy:who}});
+    await api('POST','/api/groceries/merge',{ids:a.map(x=>x.id),item:{name:a[0].name,qty,category:a[0].category}});
   }
   await load(true); toast('Merged');
 }
@@ -584,7 +575,6 @@ function renderGrocery(){
       <div class="g-item ${g.checked?'done':''}">
         <input type="checkbox" ${g.checked?'checked':''} onchange="toggleG('${g.id}',this.checked)">
         <div class="nm" onclick="editG('${g.id}')">${esc(g.name)}${g.qty?` <span class="muted">&times; ${esc(g.qty)}</span>`:''}</div>
-        ${g.addedBy?`<span class="chip" style="margin:0">${esc(g.addedBy)}</span>`:''}
       </div>`).join('') + '</div>').join('');
 }
 
