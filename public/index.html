@@ -207,8 +207,7 @@ const DEPART = new Date('2027-06-04T09:00:00-07:00');
 const CATS = ['Produce','Meat & Seafood','Dairy & Eggs','Pantry','Breakfast','Drinks','Beer & Liquor','Snacks','Supplies','Other'];
 
 let S = { rev:0, golf:[], flights:[], expenses:[], groceries:[], vrbo:{}, tournament:{} };
-let me = ls('me') || '';
-if(me==='Mike'){ me='Mroz'; ls('me','Mroz'); }
+try{ localStorage.removeItem('me'); }catch(e){}
 function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v);}catch(e){return null} }
 
 const $ = id => document.getElementById(id);
@@ -312,7 +311,7 @@ fetch('https://api.open-meteo.com/v1/forecast?latitude=33.49&longitude=-111.93&c
 
 /* ---------- Trip tab ---------- */
 function renderTrip(){
-  $('crew').innerHTML = CREW.map(n=>`<span class="chip ${n===me?'me':''}">${n}</span>`).join('');
+  $('crew').innerHTML = CREW.map(n=>`<span class="chip">${n}</span>`).join('');
   const rows = [
     ['2027-05-29','Land in Scottsdale','JSX XE463 lands 1:10 PM'],
     ...S.golf.map(g=>[g.date, g.course+' ('+g.layout+')', g.teeTime?('Tee time '+g.teeTime):'Tee time TBD']),
@@ -405,7 +404,7 @@ function renderFlights(){
       <div class="row between"><span class="tag ${f.dir==='Depart'?'depart':'arrive'}">${esc(f.dir)}</span><span class="muted small">${esc(f.airline)} ${esc(f.flightNo)}</span></div>
       <h2 style="color:var(--text);margin:8px 0 2px">${esc(f.from||'TBD')} &rarr; ${esc(f.to||'TBD')}</h2>
       <div>${fmtDate(f.date)}${f.time?' &middot; '+fmtTime(f.time):''}</div>
-      <div style="margin-top:8px">${(f.travelers||'').split(',').map(s=>s.trim()).filter(Boolean).map(n=>`<span class="chip ${n===me?'me':''}">${esc(n)}</span>`).join('')}</div>
+      <div style="margin-top:8px">${(f.travelers||'').split(',').map(s=>s.trim()).filter(Boolean).map(n=>`<span class="chip">${esc(n)}</span>`).join('')}</div>
       ${f.confirmation?`<div class="small" style="margin-top:6px">Confirmation: <b>${esc(f.confirmation)}</b></div>`:''}
       ${f.notes?`<div class="muted small" style="margin-top:6px">${esc(f.notes)}</div>`:''}
     </div>`).join('') : '<div class="empty">No flights yet.</div>';
@@ -483,7 +482,7 @@ function transfers(bal){
 }
 function renderMoney(){
   const {bal,spent} = computeBalances();
-  $('balances').innerHTML = CREW.map(n=>`<div class="bal"><span>${n}${n===me?' (you)':''}<span class="muted small"> &middot; share ${money(spent[n]||0)}</span></span><span class="${bal[n]>0?'pos':bal[n]<0?'neg':''}">${bal[n]>0?'is owed ':bal[n]<0?'owes ':''}${money(Math.abs(bal[n]))}</span></div>`).join('');
+  $('balances').innerHTML = CREW.map(n=>`<div class="bal"><span>${n}<span class="muted small"> &middot; share ${money(spent[n]||0)}</span></span><span class="${bal[n]>0?'pos':bal[n]<0?'neg':''}">${bal[n]>0?'is owed ':bal[n]<0?'owes ':''}${money(Math.abs(bal[n]))}</span></div>`).join('');
   const t = transfers(bal);
   $('settle').innerHTML = t.length ? t.map(([a,b,c])=>`<div class="bal"><span><b>${a}</b> pays <b>${b}</b></span><span class="price" style="font-size:18px">${money(c)}</span></div>`).join('') : '<div class="empty">All square.</div>';
   const ex = [...S.expenses].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
@@ -495,7 +494,7 @@ function renderMoney(){
 }
 function today(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function editExpense(id){
-  const e = id ? S.expenses.find(x=>x.id===id) : {payer:me||CREW[0], split:CREW, date:today()};
+  const e = id ? S.expenses.find(x=>x.id===id) : {payer:CREW[0], split:CREW, date:today()};
   openForm(id?'Edit expense':'Add expense',[
     {key:'desc',label:'What was it',ph:'Groceries, Uber, dinner...'},
     {row:[{key:'amount',label:'Amount ($)',type:'number'},{key:'date',label:'Date',type:'date'}]},
@@ -509,7 +508,7 @@ function editExpense(id){
   }, id?async()=>{ await api('DELETE','/api/expenses/'+id); await load(true); }:null);
 }
 function editPayment(id){
-  const e = id ? S.expenses.find(x=>x.id===id) : {payer:me||CREW[0], to:CREW[0], date:today()};
+  const e = id ? S.expenses.find(x=>x.id===id) : {payer:CREW[0], to:CREW[1], date:today()};
   openForm(id?'Edit payment':'Record a payment',[
     {row:[{key:'payer',label:'From',type:'select',options:CREW},{key:'to',label:'To',type:'select',options:CREW}]},
     {row:[{key:'amount',label:'Amount ($)',type:'number'},{key:'date',label:'Date',type:'date'}]}
