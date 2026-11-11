@@ -184,13 +184,14 @@ a{color:var(--accent2)}
 <div class="toast" id="toast"></div>
 
 <script>
-const CREW = ['Bill','Mike','Meachum','Andy','Freddie','Benny'];
+const CREW = ['Bill','Mroz','Meachum','Andy','Freddie','Benny'];
 const LAND = new Date('2027-05-29T13:10:00-07:00');   // Arizona is MST all year (UTC-7)
 const DEPART = new Date('2027-06-04T09:00:00-07:00');
 const CATS = ['Produce','Meat & Seafood','Dairy & Eggs','Pantry','Breakfast','Drinks','Beer & Liquor','Snacks','Supplies','Other'];
 
 let S = { rev:0, golf:[], flights:[], expenses:[], groceries:[], vrbo:{}, tournament:{} };
 let me = ls('me') || '';
+if(me==='Mike'){ me='Mroz'; ls('me','Mroz'); }
 function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v);}catch(e){return null} }
 
 const $ = id => document.getElementById(id);

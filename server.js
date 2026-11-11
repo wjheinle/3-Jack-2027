@@ -31,8 +31,8 @@ function seed() {
       { id: id(), date: '2027-06-03', course: 'Grayhawk Golf Club', layout: 'Talon', cost: 0, costNote: 'paid ahead with the Raptor round', teeTime: '', notes: '' }
     ],
     flights: [
-      { id: id(), dir: 'Arrive', airline: 'JSX', flightNo: 'XE463', date: '2027-05-29', time: '13:10', from: '', to: 'Scottsdale', travelers: 'Bill, Mike, Andy', confirmation: '', notes: 'Lands 1:10 PM' },
-      { id: id(), dir: 'Depart', airline: 'JSX', flightNo: 'XE462', date: '2027-06-04', time: '09:00', from: 'Scottsdale', to: '', travelers: 'Bill, Mike, Andy', confirmation: '', notes: 'Departs 9:00 AM' },
+      { id: id(), dir: 'Arrive', airline: 'JSX', flightNo: 'XE463', date: '2027-05-29', time: '13:10', from: '', to: 'Scottsdale', travelers: 'Bill, Mroz, Andy', confirmation: '', notes: 'Lands 1:10 PM' },
+      { id: id(), dir: 'Depart', airline: 'JSX', flightNo: 'XE462', date: '2027-06-04', time: '09:00', from: 'Scottsdale', to: '', travelers: 'Bill, Mroz, Andy', confirmation: '', notes: 'Departs 9:00 AM' },
       { id: id(), dir: 'Arrive', airline: 'Southwest', flightNo: '', date: '', time: '', from: 'Denver', to: 'Phoenix', travelers: 'Meachum', confirmation: '', notes: 'Probably flying Southwest. Details TBD.' },
       { id: id(), dir: 'Arrive', airline: 'United', flightNo: '', date: '', time: '', from: 'Houston', to: 'Phoenix (PHX)', travelers: 'Freddie, Benny', confirmation: '', notes: 'Details TBD.' }
     ],
@@ -52,6 +52,21 @@ try {
   state = seed();
   save();
 }
+
+// One-time rename: Mike -> Mroz (there is also a Mike Meachum)
+(function renameMike() {
+  const re = /\bMike\b/g;
+  let changed = false;
+  const fix = v => { const n = v.replace(re, 'Mroz'); if (n !== v) changed = true; return n; };
+  state.flights.forEach(f => { if (typeof f.travelers === 'string') f.travelers = fix(f.travelers); });
+  state.expenses.forEach(e => {
+    if (typeof e.payer === 'string') e.payer = fix(e.payer);
+    if (typeof e.to === 'string') e.to = fix(e.to);
+    if (Array.isArray(e.split)) e.split = e.split.map(fix);
+  });
+  state.groceries.forEach(g => { if (typeof g.addedBy === 'string') g.addedBy = fix(g.addedBy); });
+  if (changed) save();
+})();
 
 function save() {
   state.rev = (state.rev || 0) + 1;
