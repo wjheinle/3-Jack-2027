@@ -109,7 +109,7 @@ a{color:var(--accent2)}
     <h1>2027 3-Jack<br>Invitational/Cup</h1>
     <div class="sub">Scottsdale &middot; May 29 to June 4</div>
     <div class="yards"><b id="yd">0</b><span id="ydLabel">yards to the pin</span></div>
-    <div class="yd-sub" id="ydSub">&nbsp;</div>
+    <div class="yd-sub" id="ydSub" style="display:none"></div>
     <svg id="scene" viewBox="0 0 360 110" role="img" aria-label="Golf ball on the way to the pin. Tap to hit another shot.">
       <rect x="0" y="88" width="360" height="22" fill="#2f6a3a"/>
       <path d="M0 88 Q90 84 180 88 T360 88 V92 H0Z" fill="#4c9a52"/>
@@ -282,20 +282,21 @@ function shoot(){
 }
 $('scene').addEventListener('click',shoot);
 
+function setSub(t){ const e=$('ydSub'); e.textContent=t; e.style.display=t?'':'none'; }
 function tick(){
   const now = new Date(), ph = phase(now);
   let target, label;
   if(ph === 1){
     target = LAND; label = 'Until wheels down in Scottsdale';
     const left = LAND - now;
-    if(left >= 864e5){ const d = Math.floor(left/864e5); $('yd').textContent = d; $('ydLabel').textContent = 'yards to the pin'; $('ydSub').textContent = d + (d===1?' day':' days') + ' to go'; }
-    else { const hrs = Math.max(1,Math.ceil(left/36e5)); $('yd').textContent = hrs; $('ydLabel').textContent = 'feet to the pin'; $('ydSub').textContent = hrs + (hrs===1?' hour':' hours') + ' to go'; }
+    if(left >= 864e5){ const d = Math.floor(left/864e5); $('yd').textContent = d; $('ydLabel').textContent = 'yards to the pin'; setSub(''); }
+    else { const hrs = Math.max(1,Math.ceil(left/36e5)); $('yd').textContent = hrs; $('ydLabel').textContent = 'feet to the pin'; setSub(''); }
   } else if(ph === 2){
     target = DEPART; label = 'Until we fly home';
     const day = Math.min(7, Math.floor((now - LAND)/864e5) + 1);
-    $('yd').textContent = 'Day ' + day; $('ydLabel').textContent = 'of 7 on the course'; $('ydSub').textContent = "Ball's in the cup";
+    $('yd').textContent = 'Day ' + day; $('ydLabel').textContent = 'of 7 on the course'; setSub("Ball's in the cup");
   } else {
-    $('yd').textContent = '3'; $('ydLabel').textContent = 'Jack'; $('ydSub').textContent = 'See you next May';
+    $('yd').textContent = '3'; $('ydLabel').textContent = 'Jack'; setSub('See you next May');
     $('cdLabel').textContent = 'Until next May'; $('cd').style.display = 'none';
     if(!shooting) setBall(PIN_X,GROUND);
     return;
