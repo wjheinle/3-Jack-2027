@@ -104,6 +104,7 @@ a{color:var(--accent2)}
 <body>
 
 <div id="p-trip" class="page active">
+  <div id="fallbackWarn" style="padding-top:env(safe-area-inset-top)"></div>
   <div class="hero">
     <div class="sun"></div>
     <h1>2027 3-Jack<br>Invitational/Cup</h1>
@@ -144,7 +145,6 @@ a{color:var(--accent2)}
     <div id="crew"></div>
     <div class="muted small" style="margin-top:8px">6 of us in the house, 28 guys in the tournament.</div>
   </div>
-  <div id="fallbackWarn"></div>
 </div>
 
 <div id="p-golf" class="page">
@@ -322,7 +322,7 @@ function renderTrip(){
     const d=pd(r[0]);
     return `<div class="day"><div class="d">${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}<small>${d.toLocaleDateString('en-US',{weekday:'long'})}</small></div><div><div>${esc(r[1])}</div><div class="muted small">${esc(r[2])}</div></div></div>`;
   }).join('');
-  $('fallbackWarn').innerHTML = S.usingFallback ? '<div class="warn">Server is not using the /data volume. Entries will be lost on redeploy. Check the Railway volume mount path.</div>' : '';
+  $('fallbackWarn').innerHTML = S.usingFallback ? '<div class="warn">Edits are NOT being saved permanently. The server cannot write to the /data volume. See /api/health for the reason.</div>' : '';
 }
 
 /* ---------- generic form modal ---------- */

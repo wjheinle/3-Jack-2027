@@ -8,10 +8,15 @@ const PORT = process.env.PORT || 3000;
 // Persistent storage: mount a Railway volume at /data (or set DATA_DIR).
 let DATA_DIR = process.env.DATA_DIR || '/data';
 let usingFallback = false;
+let fallbackReason = '';
 try {
   fs.mkdirSync(DATA_DIR, { recursive: true });
-  fs.accessSync(DATA_DIR, fs.constants.W_OK);
+  const probe = path.join(DATA_DIR, '.write-test');
+  fs.writeFileSync(probe, String(Date.now()));
+  fs.unlinkSync(probe);
 } catch (e) {
+  fallbackReason = e.code || e.message;
+  console.warn('WARNING: ' + DATA_DIR + ' is not writable (' + fallbackReason + ') uid=' + (process.getuid ? process.getuid() : '?'));
   usingFallback = true;
   DATA_DIR = path.join(__dirname, 'data');
   fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -96,7 +101,7 @@ app.use(express.json({ limit: '200kb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/api/health', (req, res) => {
-  res.json({ ok: true, dataDir: DATA_DIR, usingFallback, rev: state.rev,
+  res.json({ ok: true, dataDir: DATA_DIR, usingFallback, fallbackReason, uid: process.getuid ? process.getuid() : null, rev: state.rev,
     counts: Object.fromEntries(LISTS.map(l => [l, state[l].length])) });
 });
 
