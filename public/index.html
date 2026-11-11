@@ -32,7 +32,14 @@ h1,h2,h3{font-family:var(--head);letter-spacing:.04em;text-transform:uppercase;m
 .hero>*:not(.sun):not(.cacti){position:relative;z-index:2}
 .hero h1{font-size:34px;line-height:1.05;text-shadow:0 2px 8px rgba(0,0,0,.4)}
 .hero .sub{font-size:13px;opacity:.9;margin-top:4px;letter-spacing:.08em;text-transform:uppercase}
-.cd-label{margin-top:18px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.95}
+.yards{margin-top:14px;line-height:1}
+.yards b{display:block;font-family:var(--head);font-size:84px;font-weight:700;text-shadow:0 3px 12px rgba(0,0,0,.45)}
+.yards span{display:block;font-family:var(--head);font-size:15px;letter-spacing:.2em;text-transform:uppercase;margin-top:2px}
+.yd-sub{font-size:12px;opacity:.9;margin-top:4px}
+#scene{display:block;width:100%;max-width:420px;margin:8px auto 0;cursor:pointer;overflow:visible}
+#scene .flag{transform-origin:322px 57px;animation:flutter 1.6s ease-in-out infinite}
+@keyframes flutter{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.82) skewY(3deg)}}
+.cd-label{margin-top:10px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.95}
 .cd{display:flex;justify-content:center;gap:10px;margin:8px 0 70px}
 .cd div{background:rgba(31,20,17,.55);backdrop-filter:blur(4px);border-radius:12px;min-width:64px;padding:10px 6px}
 .cd b{display:block;font-family:var(--head);font-size:30px;line-height:1}
@@ -102,6 +109,22 @@ a{color:var(--accent2)}
     <div class="sun"></div>
     <h1>2027 3-Jack<br>Invitational/Cup</h1>
     <div class="sub">Scottsdale &middot; May 29 to June 4</div>
+    <div class="yards"><b id="yd">0</b><span id="ydLabel">yards to the pin</span></div>
+    <div class="yd-sub" id="ydSub">&nbsp;</div>
+    <svg id="scene" viewBox="0 0 360 110" role="img" aria-label="Golf ball on the way to the pin. Tap to hit another shot.">
+      <rect x="0" y="88" width="360" height="22" fill="#2f6a3a"/>
+      <path d="M0 88 Q90 84 180 88 T360 88 V92 H0Z" fill="#4c9a52"/>
+      <ellipse cx="322" cy="88.5" rx="34" ry="6" fill="#79c862"/>
+      <ellipse cx="250" cy="90" rx="15" ry="3.2" fill="#ecd9a6"/>
+      <g fill="#173a22"><polygon points="118,88 124,64 130,88"/><polygon points="136,88 143,58 150,88"/><polygon points="196,88 201,68 206,88"/><polygon points="206,88 213,62 220,88"/></g>
+      <rect x="25" y="86" width="6" height="2.5" rx="1" fill="#f6ece0"/>
+      <path id="trail" d="" fill="none" stroke="#f6ece0" stroke-width="1.4" stroke-dasharray="2 3" opacity=".8"/>
+      <ellipse cx="322" cy="88.5" rx="3.2" ry="1.2" fill="#1f1411"/>
+      <line x1="322" y1="88" x2="322" y2="48" stroke="#f6ece0" stroke-width="1.6"/>
+      <polygon class="flag" points="322,48 345,55.5 322,63" fill="#f6ece0"/>
+      <ellipse id="ballShadow" cx="28" cy="88.4" rx="3.6" ry="1.1" fill="#000" opacity=".3"/>
+      <circle id="ball" cx="28" cy="84.2" r="3.6" fill="#fff" stroke="#c9bba8" stroke-width=".7"/>
+    </svg>
     <div class="cd-label" id="cdLabel">&nbsp;</div>
     <div class="cd" id="cd">
       <div><b id="cdD">0</b><span>days</span></div>
@@ -224,18 +247,67 @@ function showTab(t){
 }
 
 /* ---------- countdown ---------- */
+const START = new Date('2026-11-11T00:00:00-07:00'); // when the app went live
+const TEE_X = 28, PIN_X = 322, GROUND = 84.2;
+let shooting = false, rafId = 0;
+const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function phase(now){ return now < LAND ? 1 : (now < DEPART ? 2 : 3); }
+function restX(now){
+  const ph = phase(now);
+  if(ph !== 1) return PIN_X;
+  return TEE_X + Math.min(1, Math.max(0, (now - START) / (LAND - START))) * (PIN_X - TEE_X - 8);
+}
+function setBall(x,y){
+  $('ball').setAttribute('cx',x); $('ball').setAttribute('cy',y);
+  const sh = $('ballShadow'); sh.setAttribute('cx',x);
+  const lift = Math.max(0,(GROUND-y)); sh.setAttribute('rx',Math.max(1.8,3.6-lift*0.04)); sh.setAttribute('opacity',Math.max(.1,.3-lift*0.004));
+}
+function shoot(){
+  const now = new Date(), target = restX(now), dist = target - TEE_X;
+  if(reduceMotion){ setBall(target,GROUND); return; }
+  cancelAnimationFrame(rafId); shooting = true;
+  const h = Math.max(16, Math.min(62, dist*0.4)), dur = 1500, t0 = performance.now(), pts = [];
+  $('trail').setAttribute('d','');
+  (function frame(tn){
+    let t = Math.min(1,(tn - t0)/dur);
+    const x = TEE_X + dist*(1-Math.pow(1-t,1.7));
+    let y = GROUND - 4*h*t*(1-t);
+    if(t>=1) y = GROUND;
+    setBall(x,y);
+    pts.push((pts.length?'L':'M')+x.toFixed(1)+' '+y.toFixed(1));
+    if(t<0.98) $('trail').setAttribute('d',pts.join(' '));
+    if(t<1) rafId = requestAnimationFrame(frame);
+    else { shooting = false; setTimeout(()=>{ if(!shooting) $('trail').setAttribute('d',''); },1600); }
+  })(t0);
+}
+$('scene').addEventListener('click',shoot);
+
 function tick(){
-  const now = new Date();
+  const now = new Date(), ph = phase(now);
   let target, label;
-  if(now < LAND){ target = LAND; label = 'Until wheels down in Scottsdale'; }
-  else if(now < DEPART){ target = DEPART; label = 'Until we fly home'; }
-  else { $('cdLabel').textContent = 'Until next May'; $('cd').style.display='none'; return; }
+  if(ph === 1){
+    target = LAND; label = 'Until wheels down in Scottsdale';
+    const left = LAND - now;
+    if(left >= 864e5){ const d = Math.ceil(left/864e5); $('yd').textContent = d; $('ydLabel').textContent = 'yards to the pin'; $('ydSub').textContent = d + (d===1?' day':' days') + ' to go'; }
+    else { const hrs = Math.max(1,Math.ceil(left/36e5)); $('yd').textContent = hrs; $('ydLabel').textContent = 'feet to the pin'; $('ydSub').textContent = hrs + (hrs===1?' hour':' hours') + ' to go'; }
+  } else if(ph === 2){
+    target = DEPART; label = 'Until we fly home';
+    const day = Math.min(7, Math.floor((now - LAND)/864e5) + 1);
+    $('yd').textContent = 'Day ' + day; $('ydLabel').textContent = 'of 7 on the course'; $('ydSub').textContent = "Ball's in the cup";
+  } else {
+    $('yd').textContent = '3'; $('ydLabel').textContent = 'Jack'; $('ydSub').textContent = 'See you next May';
+    $('cdLabel').textContent = 'Until next May'; $('cd').style.display = 'none';
+    if(!shooting) setBall(PIN_X,GROUND);
+    return;
+  }
   $('cdLabel').textContent = label;
   let d = Math.max(0, target - now);
   const days = Math.floor(d/864e5); d -= days*864e5;
   const h = Math.floor(d/36e5); d -= h*36e5;
   const m = Math.floor(d/6e4); d -= m*6e4;
   $('cdD').textContent = days; $('cdH').textContent = h; $('cdM').textContent = m; $('cdS').textContent = Math.floor(d/1000);
+  if(!shooting) setBall(restX(now),GROUND);
 }
 setInterval(tick,1000);
 
@@ -528,6 +600,7 @@ new MutationObserver(()=>{ if(!$('mbg').classList.contains('open') && pending){ 
 
 load(true).then(()=>{ const t = ls('tab'); if(t && document.getElementById('p-'+t)) showTab(t); });
 tick();
+setTimeout(shoot,700);
 setInterval(()=>{ if(!document.hidden && document.activeElement.tagName!=='INPUT' && document.activeElement.tagName!=='TEXTAREA') load(); },8000);
 document.addEventListener('visibilitychange',()=>{ if(!document.hidden) load(); });
 </script>
