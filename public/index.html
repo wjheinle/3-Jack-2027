@@ -220,7 +220,7 @@ function fmtTime(t){ if(!t) return ''; const [h,m]=t.split(':').map(Number); ret
 function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1600); }
 
 async function api(method,url,body){
-  const r = await fetch(url,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
+  const r = await fetch(url,{method,cache:'no-store',headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
   if(!r.ok) throw new Error('request failed');
   return r.json();
 }
@@ -343,9 +343,10 @@ function openForm(title, fields, vals, onSave, onDelete){
       if(f.type==='checks') out[f.key] = [...document.querySelectorAll(`[name="${f.key}"]:checked`)].map(x=>x.value);
       else { const v = $('f_'+f.key).value; out[f.key] = f.type==='number' ? (v===''?'':Number(v)) : v.trim(); }
     }
-    if(await onSave(out) !== false) closeForm();
+    try{ if(await onSave(out) !== false) closeForm(); }
+    catch(e){ toast('Could not save. Check your connection and try again.'); }
   };
-  if(onDelete) $('mDel').onclick = async ()=>{ if(confirm('Delete this?')){ await onDelete(); closeForm(); } };
+  if(onDelete) $('mDel').onclick = async ()=>{ if(confirm('Delete this?')){ try{ await onDelete(); closeForm(); }catch(e){ toast('Could not delete. Try again.'); } } };
 }
 function fieldHtml(f, vals){
   const v = vals[f.key]!==undefined ? vals[f.key] : (f.def!==undefined?f.def:'');
@@ -392,7 +393,7 @@ function editGolf(id){
   }, id?async()=>{ await api('DELETE','/api/golf/'+id); await load(true); }:null);
 }
 async function saveTourn(){
-  await api('PUT','/api/tournament',{notes:$('tournNotes').value});
+  try{ await api('PUT','/api/tournament',{notes:$('tournNotes').value}); }catch(e){ return toast('Could not save. Try again.'); }
   $('tournStatus').textContent='Saved'; setTimeout(()=>$('tournStatus').textContent='',1500); load(true);
 }
 
@@ -449,7 +450,7 @@ function renderVrbo(){
 async function saveVrbo(){
   const o = {};
   $('vrboCard').querySelectorAll('[data-k]').forEach(el=>{ const val=el.value.trim(); if(val!=='') o[el.dataset.k]= el.type==='number'?Number(val):val; });
-  await api('PUT','/api/vrbo',o);
+  try{ await api('PUT','/api/vrbo',o); }catch(e){ $('vrboStatus').textContent='NOT saved, retry'; return; }
   $('vrboStatus').textContent='Saved'; setTimeout(()=>$('vrboStatus').textContent='',1500);
   const s = await api('GET','/api/state'); S.rev = s.rev; S.vrbo = s.vrbo;
   renderTrip();
@@ -524,7 +525,7 @@ function editPayment(id){
 $('gCat').innerHTML = CATS.map(c=>`<option>${esc(c)}</option>`).join('');
 async function addGrocery(){
   const name = $('gName').value.trim(); if(!name) return;
-  await api('POST','/api/groceries',{name,qty:$('gQty').value.trim(),category:$('gCat').value,checked:false});
+  try{ await api('POST','/api/groceries',{name,qty:$('gQty').value.trim(),category:$('gCat').value,checked:false}); }catch(e){ return toast('Could not add item. Try again.'); }
   $('gName').value=''; $('gQty').value=''; await load(true); $('gName').focus();
 }
 $('gName').addEventListener('keydown',e=>{ if(e.key==='Enter') addGrocery(); });
